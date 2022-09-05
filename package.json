@@ -1,0 +1,21 @@
+{
+  "name": "3xdl",
+  "version": "1.0.0",
+  "description": "Free X Downloader",
+  "author": "Ratan M. Kyeno",
+  "license": "MIT",
+  "main": "3xdl.js",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "puppeteer": "^17.1.1"
+  }
+}
