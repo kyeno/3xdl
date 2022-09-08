@@ -19,3 +19,8 @@ Please also mind this downloader was built **for educational and research purpos
 
 ### Say thanks!
 If you like the tool, and the overall idea of helping the non-biased FREEDOM, please consider donating some [PIVX](https://pivx.org) to `ps1fxv6ktsg992shxrr040mmussd49pqfa7xfh8rzdkkr3xlpz3swt3ltanqq2plav0h47yuzxzyxd`!
+
+### With PIVX Labs support
+3xdl is built with love by one of the PIVX Labs developers.
+The mission of PIVX Labs is to accelerate the adoption & growth of PIVX as a currency, using awesomeness.
+Join the [PIVX Labs Discord](https://discord.gg/v57eCP4MMx) to meet us!

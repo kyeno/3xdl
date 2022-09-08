@@ -15,6 +15,7 @@
     "x64"
   ],
   "dependencies": {
+    "await-spawn": "^4.0.2",
     "lodash": "^4.17.21",
     "puppeteer": "^17.1.1"
   }

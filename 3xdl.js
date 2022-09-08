@@ -15,7 +15,7 @@
 const
     _ = require('lodash'),
     puppeteer = require('puppeteer'),
-    spawn = require('child_process').spawn,
+    spawn = require('await-spawn'),
     args = process.argv.slice(2)
 ;
 
@@ -53,9 +53,11 @@ console.log(`Analyzing "${url.href}"...`);
     try { playlist = await page.evaluate(() => { return jw_player.getPlaylist()}); }
     catch(e) {
 
-        await page.screenshot({ path: 'error.png' });
+        const errorFile = `error-${Date.now()}.png`;
 
-        console.error('ERROR: Cannot find the video player on that site, error.png has been saved');
+        await page.screenshot({ path: errorFile });
+
+        console.error(`ERROR: Cannot find the video player on that site, ${errorFile} has been saved`);
 
         await browser.close();
         process.exit();
@@ -64,34 +66,43 @@ console.log(`Analyzing "${url.href}"...`);
     // Verify if the playlist has contents
     if(!playlist.length || !playlist[0]) {
 
-        console.error('ERROR: No videos found within the player');
+        console.error('ERROR: Playlist inaccessible/No videos found within the player!');
 
         await browser.close();
         process.exit();
     }
 
-    console.log('Video found, preparing download...');
+    // Free up some RAM
+    await browser.close();
 
-    // ** L8R: Consider looping through all of the playlist
-    const item = playlist[0];
+    // Loop through all of the playlist contents
+    console.log('Playlist found, preparing download(s)...');
+    for await (const item of playlist) {
 
-    // Prepare vars for download
-    // ** TODO: Be more defensive here; check if it worked, check if the file exists and may need fixing, etc
-    const urlDownload = item.file.match(/^(http|https|ftp):\/\//) ? item.file : `${url.origin}/${item.file.replace(/^\//, '')}`;
-    const fileName = `${_.snakeCase(_.deburr(item.title))}.${urlDownload.split(/[#?]/)[0].split('.').pop().replace(/[^\w\s]/gi, '').trim()}`;
+        // Skip if there's no "file" in this loop cycle
+        if(!item.file) continue;
 
-    // Attempt download with wget
-    console.log('Downloading...');
-    console.log('If you like the tool, consider donating PIVX to ps1fxv6ktsg992shxrr040mmussd49pqfa7xfh8rzdkkr3xlpz3swt3ltanqq2plav0h47yuzxzyxd\nhttps://pivx.org\nThank you!');
-    let child = spawn('wget', [
+        // Prepare vars for download
+        const urlDownload = item.file.match(/^(http|https|ftp):\/\//) ? item.file : `${url.origin}/${item.file.replace(/^\//, '')}`;
+        const fileExtension = urlDownload.split(/[#?]/)[0].split('.').pop().replace(/[^\w\s]/gi, '').trim();
+        const fileName = item.title ? `${_.snakeCase(_.deburr(item.title))}.${fileExtension}` : `${Date.now()}.${fileExtension}`;
 
-        `--output-document=${fileName}`,
-        '--no-check-certificate',
-        '--no-verbose',
-        '--show-progress',
-        urlDownload
-    ], { stdio: 'inherit' });
+        // Attempt to download with wget
+        console.log('Downloading...');
+        try {
+
+            const buffer = await spawn('wget', [
+
+                `--output-document=${fileName}`,
+                '--no-check-certificate',
+                '--no-verbose',
+                '--show-progress',
+                urlDownload
+            ], { stdio: 'inherit' });
+        }
+        catch(e) { console.error(`ERROR: ${e.stderr.toString()}`); }
+    }
 
     // Exit gracefully
-    await browser.close();
+    console.log('---\nAll done!\n\nIf you like the tool,\nplease donate PIVX to ps1fxv6ktsg992shxrr040mmussd49pqfa7xfh8rzdkkr3xlpz3swt3ltanqq2plav0h47yuzxzyxd\nhttps://pivx.org\n\nThank you!');
 })();
